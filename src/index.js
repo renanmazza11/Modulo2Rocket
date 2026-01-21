@@ -25,7 +25,6 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 
 }
-
 app.post('/users', (request, response) => {
 
     const {name, username}= request.body;
@@ -50,7 +49,6 @@ app.post('/users', (request, response) => {
 
 
 });
-
 app.get('/todos', checksExistsUserAccount, (request, response) => {
 
   const {user} = request;
@@ -58,13 +56,6 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
   return response.status(200).json(user.todos)
   
 });
-
-//teste
-
-
-
-
-
 app.post('/todos', checksExistsUserAccount, (request, response) => {
 
   const {title, deadline} = request.body
@@ -75,7 +66,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
     id: uuidv4(),
     title,
-    done: "false",
+    done: false,
     deadline: new Date(deadline),
     created_at: new Date()
 
@@ -83,26 +74,52 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
   user.todos.push(newTodos);
 
-  return response.status(200).json(user);
-
+  return response.status(201).json(user);
 
 });
-
-
-
-
-
-
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
+ 
+  const {title, deadline} = request.body;
+  const {id} = request.params;
+  const {user} = request;
 
+  const findExistTodos = user.todos.find(user => user.id === id);
+
+  if(!findExistTodos) return response.status(404).json({error: "Todo not Exist!"})
+
+  findExistTodos.title = title,
+  findExistTodos.deadline = new Date(deadline)
+
+  return response.status(200).json(findExistTodos);
+
+});
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
 
+  const {id} = request.params;
+  const {user} = request;
+
+  const findExistTodos = user.todos.find(user => user.id === id);
+
+  if(!findExistTodos) return response.status(404).json({error: "Todo not Exist!"})
+
+  findExistTodos.done = true;
+
+  return response.status(200).json(findExistTodos);
+
+});
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+
+  const {id} = request.params;
+  const {user} = request;
+
+  const findExistTodos = user.todos.find(user => user.id === id);
+
+  if(!findExistTodos) return response.status(404).json({error: "Todo not Exist!"})
+
+  user.todos.splice(findExistTodos, 1)
+
+  return response.status(204).json();
+
 });
 
 module.exports = app;
